@@ -78,17 +78,22 @@ SERVICE
 
 systemctl enable code-server@$username
 
-echo ">> Installing nvm and Node.js versions..."
-sudo -u $username bash <<USERSETUP
-cd ~
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-export NVM_DIR="\$HOME/.nvm"
-source "\$NVM_DIR/nvm.sh"
+# Install nvm if not installed
+if [ ! -d "$HOME/.nvm" ]; then
+  git clone https://github.com/nvm-sh/nvm.git ~/.nvm
+  cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`
+fi
 
+# Source nvm
+export NVM_DIR="$HOME/.nvm"
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+  . "$NVM_DIR/nvm.sh"
+fi
+
+# Install specific Node versions
 nvm install 14
 nvm install 20
 nvm install --lts
-nvm use lts/*
 
 corepack enable
 corepack prepare yarn@stable --activate
